@@ -1,0 +1,515 @@
+{
+  "info": {
+    "name": "Issue Tracker API with Status Code Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Issue",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"버그 수정 필요\",\n  \"description\": \"로그인 페이지에서 오류 발생\",\n  \"userId\": 1\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "  pm.response.to.have.status(201);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Issue (Missing Title)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"로그인 페이지에서 오류 발생\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Should fail with 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Issue (Invalid User)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"잘못된 사용자\",\n  \"userId\": 9999\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Should fail with 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Issues",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/issues",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issues"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Issues (PENDING)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/issues?status=PENDING",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issues"],
+          "query": [
+            { "key": "status", "value": "PENDING" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Issues (Invalid Status)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/issues?status=WRONG",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issues"],
+          "query": [
+            { "key": "status", "value": "WRONG" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Should fail with 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issue Detail",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/issue/{{ISSUE_ID}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "{{ISSUE_ID}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Issue - 정상 수정 (제목, 상태, 담당자 변경)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"로그인 버그 수정\",\"status\":\"IN_PROGRESS\",\"userId\":2}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue/{{ISSUE_ID}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "{{ISSUE_ID}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.test(\"User id should be 2\", function () {",
+              "  pm.expect(jsonData.user.id).to.eql(2);",
+              "});",
+              "pm.test(\"Status should be IN_PROGRESS\", function () {",
+              "  pm.expect(jsonData.status).to.eql(\"IN_PROGRESS\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Issue - 잘못된 ID",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"테스트\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue/abc",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "abc"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Error message is 잘못된 ID\", function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.error).to.eql(\"잘못된 ID\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Issue - 존재하지 않는 이슈 ID",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"테스트\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue/9999",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "9999"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "  pm.response.to.have.status(404);",
+              "});",
+              "pm.test(\"Error message is 이슈를 찾을 수 없습니다\", function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.error).to.eql(\"이슈를 찾을 수 없습니다\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Issue - COMPLETED 상태 이슈 수정 불가",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"변경 시도\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue/{{COMPLETED_ISSUE_ID}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "{{COMPLETED_ISSUE_ID}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 403\", function () {",
+              "  pm.response.to.have.status(403);",
+              "});",
+              "pm.test(\"Error message is 완료/취소된 이슈는 수정할 수 없습니다\", function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.error).to.eql(\"완료/취소된 이슈는 수정할 수 없습니다\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Issue - 존재하지 않는 사용자 지정",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"userId\":9999}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue/{{ISSUE_ID}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "{{ISSUE_ID}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Error message is 존재하지 않는 사용자\", function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.error).to.eql(\"존재하지 않는 사용자\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Issue - 담당자 제거 시 상태 PENDING 변경",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"userId\":0}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue/{{ISSUE_ID}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "{{ISSUE_ID}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"User should be null\", function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.user).to.eql(null);",
+              "});",
+              "pm.test(\"Status should be PENDING\", function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.status).to.eql(\"PENDING\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Issue - 상태가 IN_PROGRESS 또는 COMPLETED 이면서 담당자 없음 에러",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"status\":\"IN_PROGRESS\",\"userId\":0}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue/{{ISSUE_ID}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "{{ISSUE_ID}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Error message is 담당자 없이 해당 상태로 변경 불가\", function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.error).to.eql(\"담당자 없이 해당 상태로 변경 불가\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Issue - 유효하지 않은 상태값 에러",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"status\":\"INVALID_STATUS\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/issue/{{ISSUE_ID}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["issue", "{{ISSUE_ID}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Error message is 유효하지 않은 상태\", function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.error).to.eql(\"유효하지 않은 상태\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "ISSUE_ID",
+      "value": "1"
+    },
+    {
+      "key": "COMPLETED_ISSUE_ID",
+      "value": "2"
+    }
+  ]
+}
+
